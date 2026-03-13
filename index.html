@@ -49,11 +49,11 @@
     }
 
     .author-block a {
-      color: #333;
+      color: #2563eb;
       text-decoration: none;
-      border-bottom: 1px solid #999;
+      border-bottom: 1px solid #93c5fd;
     }
-    .author-block a:hover { border-color: #333; }
+    .author-block a:hover { border-color: #2563eb; }
 
     .affil-block { color: #666; font-size: 0.95rem; }
 
@@ -364,8 +364,8 @@
 <section class="section" style="padding-top: 2rem; padding-bottom: 1rem;">
   <div class="container is-max-desktop">
     <div style="border-radius: 12px; overflow: hidden; box-shadow: 0 6px 32px rgba(0,0,0,0.18); max-width: 900px; margin: 0 auto;">
-      <video autoplay muted loop playsinline style="width: 100%; display: block;">
-        <source src="assets/teaser.mp4" type="video/mp4">
+      <video autoplay muted loop playsinline preload="metadata" style="width: 100%; display: block;">
+        <source src="assets/teaser-web.mp4" type="video/mp4">
       </video>
     </div>
   </div>
@@ -490,9 +490,57 @@
       </p>
     </div>
     <figure style="margin: 0 auto; max-width: 960px;">
-      <img src="assets/void-method-web.jpg" alt="VOID method overview"
-           style="width:100%; border-radius:10px; box-shadow:0 6px 28px rgba(0,0,0,0.14);">
+      <picture>
+        <source srcset="assets/void-method-web.webp" type="image/webp">
+        <img src="assets/void-method-web.jpg" alt="VOID method overview" loading="lazy"
+             style="width:100%; border-radius:10px; box-shadow:0 6px 28px rgba(0,0,0,0.14);">
+      </picture>
     </figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ PASS 2 REFINEMENT ══ -->
+<section class="section" id="pass2" style="padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Pass 2 Refinement</h2>
+    <p class="section-subtitle">
+      When the first pass produces object morphing artifacts, a second pass re-runs inference
+      using flow-warped noise to stabilize shape along synthesized trajectories.
+      Drag the slider to compare Pass 1 (left) vs Pass 2 (right).
+    </p>
+
+    <!-- Example toggle -->
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:1.5rem;">
+      <button id="p2btn-ball" onclick="switchPass2('ball')"
+        style="padding:6px 22px; border-radius:20px; border:2px solid #1a1a2e; background:#1a1a2e; color:#fff;
+               font-family:'Google Sans',sans-serif; font-size:0.85rem; cursor:pointer;">Ball</button>
+      <button id="p2btn-uke" onclick="switchPass2('uke')"
+        style="padding:6px 22px; border-radius:20px; border:2px solid #ddd; background:#fff; color:#333;
+               font-family:'Google Sans',sans-serif; font-size:0.85rem; cursor:pointer;">Ukulele</button>
+    </div>
+
+    <!-- Slider -->
+    <div class="comparison-wrapper">
+      <div class="comparison-container" id="p2-container">
+        <video id="p2-video-right" autoplay muted loop playsinline>
+          <source src="assets/ball-p2.mp4" type="video/mp4">
+        </video>
+        <div id="p2-overlay-wrapper" style="position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;">
+          <video id="p2-video-left" autoplay muted loop playsinline style="position:absolute;top:0;left:0;height:100%;object-fit:cover;">
+            <source src="assets/ball-p1.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div id="p2-handle" class="comparison-handle" style="position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+          <div class="handle-line"></div>
+          <div class="handle-circle">⟺</div>
+        </div>
+      </div>
+      <div class="comparison-labels">
+        <span>&#9664; Pass 1</span>
+        <span>Pass 2 &#9654;</span>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -502,52 +550,60 @@
     <h2 class="section-title">Training Data</h2>
     <p class="section-subtitle">
       We generate paired counterfactual removal examples from Kubric (synthetic) and HUMOTO (human motion).
-      Each triplet shows the full RGB video, the interaction mask, and the ground-truth removed output.
+      Each triplet shows the input video, the quadmask, and the ground-truth counterfactual output.
     </p>
 
+    <!-- Dataset toggle -->
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:1.5rem;">
+      <button id="btn-kubric" onclick="switchDataset('kubric')"
+        style="padding:6px 22px; border-radius:20px; border:2px solid #1a1a2e; background:#1a1a2e; color:#fff;
+               font-family:'Google Sans',sans-serif; font-size:0.85rem; cursor:pointer;">Kubric</button>
+      <button id="btn-humoto" onclick="switchDataset('humoto')"
+        style="padding:6px 22px; border-radius:20px; border:2px solid #ddd; background:#fff; color:#333;
+               font-family:'Google Sans',sans-serif; font-size:0.85rem; cursor:pointer;">HUMOTO</button>
+    </div>
+
     <!-- Kubric row -->
-    <p style="text-align:center; font-family:'Google Sans',sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.6rem; color:#1a1a2e;">Kubric</p>
-    <div class="columns is-variable is-2" style="margin-bottom: 1.75rem;">
+    <div id="dataset-kubric" class="columns is-variable is-2">
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/kubric_rgb_full.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Full RGB</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Input Video</p>
       </div>
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/kubric_mask.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Interaction Mask</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Quadmask</p>
       </div>
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/kubric_rgb_removed.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Removed (Ground Truth)</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Counterfactual Video<br><span style="color:#999;">(Ground Truth)</span></p>
       </div>
     </div>
 
     <!-- HUMOTO row -->
-    <p style="text-align:center; font-family:'Google Sans',sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.6rem; color:#1a1a2e;">HUMOTO</p>
-    <div class="columns is-variable is-2">
+    <div id="dataset-humoto" class="columns is-variable is-2" style="display:none;">
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/humoto_rgb_full.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Full RGB</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Input Video</p>
       </div>
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/humoto_mask.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Interaction Mask</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Quadmask</p>
       </div>
       <div class="column">
-        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+        <video autoplay muted loop playsinline preload="none" style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
           <source src="assets/humoto_rgb_removed.mp4" type="video/mp4">
         </video>
-        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Removed (Ground Truth)</p>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Counterfactual Video<br><span style="color:#999;">(Ground Truth)</span></p>
       </div>
     </div>
 
@@ -657,6 +713,70 @@
       loadVideos();
     });
   });
+
+  // ── Pass 2 slider ─────────────────────────────────────────────────────────
+  const p2Container    = document.getElementById('p2-container');
+  const p2OverlayWrap  = document.getElementById('p2-overlay-wrapper');
+  const p2VideoLeft    = document.getElementById('p2-video-left');
+  const p2VideoRight   = document.getElementById('p2-video-right');
+  const p2Handle       = document.getElementById('p2-handle');
+
+  function syncP2VideoWidth() {
+    p2VideoLeft.style.width = p2Container.offsetWidth + 'px';
+  }
+  syncP2VideoWidth();
+  window.addEventListener('resize', syncP2VideoWidth);
+
+  p2VideoLeft.addEventListener('timeupdate', () => {
+    if (Math.abs(p2VideoLeft.currentTime - p2VideoRight.currentTime) > 0.15) {
+      p2VideoRight.currentTime = p2VideoLeft.currentTime;
+    }
+  });
+
+  function setP2Slider(clientX) {
+    const rect = p2Container.getBoundingClientRect();
+    let pct = Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
+    p2OverlayWrap.style.width = (pct * 100) + '%';
+    p2Handle.style.left = (pct * 100) + '%';
+  }
+
+  let p2Dragging = false;
+  p2Container.addEventListener('mousedown',  e => { p2Dragging = true; setP2Slider(e.clientX); e.preventDefault(); });
+  document.addEventListener('mousemove',     e => { if (p2Dragging) setP2Slider(e.clientX); });
+  document.addEventListener('mouseup',       () => { p2Dragging = false; });
+  p2Container.addEventListener('touchstart', e => { p2Dragging = true; setP2Slider(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('touchmove',     e => { if (p2Dragging) setP2Slider(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('touchend',      () => { p2Dragging = false; });
+
+  function switchPass2(name) {
+    p2VideoLeft.querySelector('source').src  = `assets/${name}-p1.mp4`;
+    p2VideoRight.querySelector('source').src = `assets/${name}-p2.mp4`;
+    p2VideoLeft.load();  p2VideoRight.load();
+    p2OverlayWrap.style.width = '50%';
+    p2Handle.style.left = '50%';
+    p2VideoLeft.play();  p2VideoRight.play();
+    ['ball','uke'].forEach(d => {
+      const btn = document.getElementById('p2btn-' + d);
+      if (d === name) {
+        btn.style.background = '#1a1a2e'; btn.style.color = '#fff'; btn.style.borderColor = '#1a1a2e';
+      } else {
+        btn.style.background = '#fff'; btn.style.color = '#333'; btn.style.borderColor = '#ddd';
+      }
+    });
+  }
+
+  // ── Dataset toggle ────────────────────────────────────────────────────────
+  function switchDataset(name) {
+    ['kubric', 'humoto'].forEach(d => {
+      document.getElementById('dataset-' + d).style.display = (d === name) ? '' : 'none';
+      const btn = document.getElementById('btn-' + d);
+      if (d === name) {
+        btn.style.background = '#1a1a2e'; btn.style.color = '#fff'; btn.style.borderColor = '#1a1a2e';
+      } else {
+        btn.style.background = '#fff'; btn.style.color = '#333'; btn.style.borderColor = '#ddd';
+      }
+    });
+  }
 
   // ── Model pills ───────────────────────────────────────────────────────────
   document.querySelectorAll('.model-pill').forEach(pill => {
