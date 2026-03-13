@@ -103,20 +103,14 @@
     }
 
     .scene-pill {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 10px;
-      border-radius: 10px;
+      display: inline-block;
+      padding: 3px;
+      border-radius: 8px;
       border: 2px solid #ddd;
       background: #fff;
       cursor: pointer;
-      font-size: 0.78rem;
-      font-family: 'Google Sans', sans-serif;
       transition: all 0.18s ease;
       user-select: none;
-      min-width: 72px;
     }
 
     .scene-pill img {
@@ -139,7 +133,6 @@
     }
 
     .scene-pill.active img {
-      outline: 2px solid rgba(255,255,255,0.5);
       border-radius: 4px;
     }
 
@@ -323,12 +316,16 @@
           </h1>
 
           <div class="is-size-5 publication-authors" style="margin-top: 1.2rem; margin-bottom: 0.4rem;">
-            <span class="author-block">Saman Motamed<sup>1,2</sup>&nbsp;&nbsp;</span>
-            <span class="author-block">William Harvey<sup>1</sup>&nbsp;&nbsp;</span>
-            <span class="author-block">Benjamin Klein<sup>1</sup>&nbsp;&nbsp;</span>
-            <span class="author-block">Luc Van Gool<sup>2</sup>&nbsp;&nbsp;</span>
-            <span class="author-block">Zhuoning Yuan<sup>1</sup>&nbsp;&nbsp;</span>
-            <span class="author-block">Ta-Ying Cheng<sup>1</sup></span>
+            <div style="margin-bottom: 0.2rem;">
+              <span class="author-block"><a href="https://sam-motamed.github.io/">Saman Motamed</a><sup>1,2</sup>&nbsp;&nbsp;</span>
+              <span class="author-block"><a href="https://scholar.google.com/citations?user=kDd7nBkAAAAJ&hl=en">William Harvey</a><sup>1</sup>&nbsp;&nbsp;</span>
+              <span class="author-block"><a href="https://scholar.google.com/citations?user=xkX9W9QAAAAJ&hl=en">Benjamin Klein</a><sup>1</sup></span>
+            </div>
+            <div>
+              <span class="author-block"><a href="https://scholar.google.be/citations?user=TwMib_QAAAAJ&hl=en&inst=1273811514435761252&oi=ao">Luc Van Gool</a><sup>2</sup>&nbsp;&nbsp;</span>
+              <span class="author-block"><a href="https://zhuoning.cc/">Zhuoning Yuan</a><sup>1</sup>&nbsp;&nbsp;</span>
+              <span class="author-block"><a href="https://ttchengab.github.io/">Ta-Ying Cheng</a><sup>1</sup></span>
+            </div>
           </div>
 
           <div class="affil-block" style="margin-bottom: 1.2rem;">
@@ -418,43 +415,34 @@
       <span class="model-pill" data-model="gemonminatte_pretrained">Gen-Omnimatte</span>
     </div>
 
-    <!-- Scene selector pills -->
+    <!-- Scene selector pills (image only) -->
     <div class="scene-pills" id="scene-pills">
       <span class="scene-pill active" data-scene="blender">
         <img src="assets/blender_thumb.jpg" alt="blender">
-        Blender
       </span>
       <span class="scene-pill" data-scene="block_dominos">
         <img src="assets/block_dominos_thumb.jpg" alt="block dominos">
-        Block Dominos
       </span>
       <span class="scene-pill" data-scene="bowling">
         <img src="assets/bowling_thumb.jpg" alt="bowling">
-        Bowling
       </span>
       <span class="scene-pill" data-scene="car-crash">
         <img src="assets/car-crash_thumb.jpg" alt="car crash">
-        Car Crash
       </span>
       <span class="scene-pill" data-scene="cat-jenga">
         <img src="assets/cat-jenga_thumb.jpg" alt="cat jenga">
-        Cat Jenga
       </span>
       <span class="scene-pill" data-scene="cat-plays-yarn">
         <img src="assets/cat-plays-yarn_thumb.jpg" alt="cat plays yarn">
-        Cat &amp; Yarn
       </span>
       <span class="scene-pill" data-scene="jump-pool_001">
         <img src="assets/jump-pool_001_thumb.jpg" alt="jump pool">
-        Jump Pool
       </span>
       <span class="scene-pill" data-scene="spinner">
         <img src="assets/spinner_thumb.jpg" alt="spinner">
-        Spinner
       </span>
       <span class="scene-pill" data-scene="weight_on_pillow">
         <img src="assets/weight_on_pillow_thumb.jpg" alt="weight on pillow">
-        Weight &amp; Pillow
       </span>
     </div>
 
@@ -480,6 +468,86 @@
       <div class="comparison-labels">
         <span>&#9664; Input + Mask</span>
         <span id="label-right">VOID (Ours) &#9654;</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ METHOD ══ -->
+<section class="section" style="background: var(--light-bg); padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Method</h2>
+    <div style="max-width: 820px; margin: 0 auto 2rem; text-align: justify; line-height: 1.8; font-size: 0.97rem;">
+      <p>
+        A user clicks on an object to remove it. A <strong>VLM-based reasoning pipeline</strong> then identifies
+        which other regions of the scene will be causally affected — objects that will fall, collide, or change
+        trajectory — and encodes this into a <strong>quadmask</strong> that guides the diffusion model.
+        VOID's <strong>first pass</strong> generates a physically plausible counterfactual video with the object
+        and its interactions removed. If the model detects object morphing — a known failure mode of smaller
+        video diffusion models — an optional <strong>second pass</strong> re-runs inference using
+        flow-warped noise derived from the first pass, stabilizing object shape along the newly synthesized trajectories.
+      </p>
+    </div>
+    <figure style="margin: 0 auto; max-width: 960px;">
+      <img src="assets/void-method-web.jpg" alt="VOID method overview"
+           style="width:100%; border-radius:10px; box-shadow:0 6px 28px rgba(0,0,0,0.14);">
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ TRAINING DATA ══ -->
+<section class="section" style="padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Training Data</h2>
+    <p class="section-subtitle">
+      We generate paired counterfactual removal examples from Kubric (synthetic) and HUMOTO (human motion).
+      Each triplet shows the full RGB video, the interaction mask, and the ground-truth removed output.
+    </p>
+
+    <!-- Kubric row -->
+    <p style="text-align:center; font-family:'Google Sans',sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.6rem; color:#1a1a2e;">Kubric</p>
+    <div class="columns is-variable is-2" style="margin-bottom: 1.75rem;">
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/kubric_rgb_full.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Full RGB</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/kubric_mask.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Interaction Mask</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/kubric_rgb_removed.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Removed (Ground Truth)</p>
+      </div>
+    </div>
+
+    <!-- HUMOTO row -->
+    <p style="text-align:center; font-family:'Google Sans',sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.6rem; color:#1a1a2e;">HUMOTO</p>
+    <div class="columns is-variable is-2">
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/humoto_rgb_full.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Full RGB</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/humoto_mask.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Interaction Mask</p>
+      </div>
+      <div class="column">
+        <video autoplay muted loop playsinline style="width:100%; border-radius:8px; box-shadow:0 3px 14px rgba(0,0,0,0.15);">
+          <source src="assets/humoto_rgb_removed.mp4" type="video/mp4">
+        </video>
+        <p style="text-align:center; font-size:0.82rem; color:#666; margin-top:6px; font-family:'Google Sans',sans-serif;">Removed (Ground Truth)</p>
       </div>
     </div>
 
