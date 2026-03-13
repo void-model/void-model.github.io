@@ -1,11 +1,605 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>void is cool</title>
-<link rel="stylesheet" href="style.css">
-</head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="VOID: Video Object and Interaction Deletion">
+  <title>VOID: Video Object and Interaction Deletion</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,wght@0,400;0,700;1,400&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <style>
+    :root {
+      --accent: #1a1a2e;
+      --light-bg: #f9f9f9;
+    }
+
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      color: #333;
+    }
+
+    /* ── Hero ── */
+    .hero.is-white { background: #fff; }
+
+    .publication-title {
+      font-family: 'Google Sans', sans-serif;
+      line-height: 1.2;
+    }
+
+    .void-logo {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+      font-size: 2.8rem;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #1a1a2e 0%, #4a4a8a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .publication-subtitle {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 400;
+      font-size: 1.5rem;
+      color: #444;
+    }
+
+    .author-block a {
+      color: #333;
+      text-decoration: none;
+      border-bottom: 1px solid #999;
+    }
+    .author-block a:hover { border-color: #333; }
+
+    .affil-block { color: #666; font-size: 0.95rem; }
+
+    /* ── Buttons ── */
+    .link-block .button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.9rem;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+      font-size: 1.75rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: #1a1a2e;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-style: italic;
+      color: #777;
+      margin-bottom: 1.75rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── Abstract ── */
+    .abstract-box {
+      background: var(--light-bg);
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      max-width: 820px;
+      margin: 0 auto;
+      line-height: 1.8;
+      font-size: 0.97rem;
+      text-align: justify;
+    }
+
+    /* ── Scene pills ── */
+    .scene-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 1.75rem;
+    }
+
+    .scene-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-family: 'Google Sans', sans-serif;
+      transition: all 0.18s ease;
+      user-select: none;
+      min-width: 72px;
+    }
+
+    .scene-pill img {
+      width: 64px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 5px;
+      display: block;
+    }
+
+    .scene-pill:hover {
+      border-color: #888;
+      background: #f0f0f0;
+    }
+
+    .scene-pill.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .scene-pill.active img {
+      outline: 2px solid rgba(255,255,255,0.5);
+      border-radius: 4px;
+    }
+
+    /* ── Comparison slider ── */
+    .comparison-wrapper {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .comparison-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+      cursor: col-resize;
+      user-select: none;
+    }
+
+    /* Base (right) video — full width behind everything */
+    #video-right {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    /* Wrapper that clips the left video */
+    #overlay-wrapper {
+      position: absolute;
+      top: 0; left: 0;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Left video — always sized to the full container width, clipped by wrapper */
+    #video-left {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Draggable handle */
+    #comparison-handle {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 100%;
+      width: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .handle-line {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 6px rgba(0,0,0,0.4);
+    }
+
+    .handle-circle {
+      position: relative;
+      z-index: 10;
+      width: 38px;
+      height: 38px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      font-size: 15px;
+      color: #333;
+    }
+
+    .comparison-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 0 2px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .comparison-labels span {
+      background: #eee;
+      padding: 3px 12px;
+      border-radius: 5px;
+    }
+
+    /* ── Model pills ── */
+    .model-pills {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .model-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 2px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: 'Google Sans', sans-serif;
+      transition: all 0.18s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .model-pill:hover {
+      border-color: #888;
+      background: #f0f0f0;
+    }
+
+    .model-pill.active {
+      border-color: #c0392b;
+      background: #c0392b;
+      color: #fff;
+    }
+
+    .model-pill.our-model.active {
+      border-color: #1a1a2e;
+      background: #1a1a2e;
+    }
+
+    .model-pills-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      font-family: 'Google Sans', sans-serif;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #ddd, transparent);
+      margin: 0 auto;
+      max-width: 900px;
+    }
+
+    /* ── BibTeX ── */
+    pre code {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    /* ── Footer ── */
+    .footer { background: #f5f5f5; padding: 2rem 1.5rem; }
+    .footer a { color: #444; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ HERO ══ -->
+<section class="hero is-white">
+  <div class="hero-body" style="padding-bottom: 1.5rem;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h1 class="publication-title" style="margin-bottom: 0.4rem;">
+            <span class="void-logo">VOID</span><br>
+            <span class="publication-subtitle">Video Object and Interaction Deletion</span>
+          </h1>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 1.2rem; margin-bottom: 0.4rem;">
+            <span class="author-block">Saman Motamed<sup>1,2</sup>&nbsp;&nbsp;</span>
+            <span class="author-block">William Harvey<sup>1</sup>&nbsp;&nbsp;</span>
+            <span class="author-block">Benjamin Klein<sup>1</sup>&nbsp;&nbsp;</span>
+            <span class="author-block">Luc Van Gool<sup>2</sup>&nbsp;&nbsp;</span>
+            <span class="author-block">Zhuoning Yuan<sup>1</sup>&nbsp;&nbsp;</span>
+            <span class="author-block">Ta-Ying Cheng<sup>1</sup></span>
+          </div>
+
+          <div class="affil-block" style="margin-bottom: 1.2rem;">
+            <span><sup>1</sup>Netflix&nbsp;&nbsp;&nbsp;</span>
+            <span><sup>2</sup>INSAIT, Sofia University "St. Kliment Ohridski"</span>
+          </div>
+
+          <div class="publication-links">
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span>Paper</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ TEASER ══ -->
+<section class="section" style="padding-top: 2rem; padding-bottom: 1rem;">
+  <div class="container is-max-desktop">
+    <div style="border-radius: 12px; overflow: hidden; box-shadow: 0 6px 32px rgba(0,0,0,0.18); max-width: 900px; margin: 0 auto;">
+      <video autoplay muted loop playsinline style="width: 100%; display: block;">
+        <source src="assets/teaser.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ ABSTRACT ══ -->
+<section class="section" style="padding-top: 2.5rem; padding-bottom: 2.5rem; background: var(--light-bg);">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Abstract</h2>
+    <div class="abstract-box">
+      Existing video object removal methods excel at inpainting content "behind" the object and correcting
+      appearance-level artifacts such as shadows and reflections. However, when the removed object has more
+      significant interactions — such as collisions with other objects — current models fail to correct them
+      and produce implausible results.
+      <br><br>
+      We present <strong>VOID</strong>, a video object removal framework designed to perform
+      physically-plausible inpainting in these complex scenarios. To train the model, we generate a new
+      paired dataset of counterfactual object removals using Kubric and HUMOTO, where removing an object
+      requires altering downstream physical interactions. During inference, a vision-language model
+      identifies regions of the scene affected by the removed object. These regions are then used to guide
+      a video diffusion model that generates physically consistent counterfactual outcomes.
+      <br><br>
+      Experiments on both synthetic and real data show that our approach better preserves consistent scene
+      dynamics after object removal compared to prior video object removal methods.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ RESULTS ══ -->
+<section class="section" id="results" style="padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Results</h2>
+    <p class="section-subtitle">
+      Select a scene and a method. Drag the slider to compare the input (with mask overlay) on the left
+      against the selected method's output on the right.
+    </p>
+
+    <!-- Model selector pills -->
+    <div class="model-pills-label">Compare against &rarr;</div>
+    <div class="model-pills" id="model-pills">
+      <span class="model-pill our-model active" data-model="model">VOID (Ours)</span>
+      <span class="model-pill" data-model="propainter">ProPainter</span>
+      <span class="model-pill" data-model="diffueraser">DiffuEraser</span>
+      <span class="model-pill" data-model="runway">Runway</span>
+      <span class="model-pill" data-model="minimax">MiniMax-Remover</span>
+      <span class="model-pill" data-model="rose">ROSE</span>
+      <span class="model-pill" data-model="gemonminatte_pretrained">Gen-Omnimatte</span>
+    </div>
+
+    <!-- Scene selector pills -->
+    <div class="scene-pills" id="scene-pills">
+      <span class="scene-pill active" data-scene="blender">
+        <img src="assets/blender_thumb.jpg" alt="blender">
+        Blender
+      </span>
+      <span class="scene-pill" data-scene="block_dominos">
+        <img src="assets/block_dominos_thumb.jpg" alt="block dominos">
+        Block Dominos
+      </span>
+      <span class="scene-pill" data-scene="bowling">
+        <img src="assets/bowling_thumb.jpg" alt="bowling">
+        Bowling
+      </span>
+      <span class="scene-pill" data-scene="car-crash">
+        <img src="assets/car-crash_thumb.jpg" alt="car crash">
+        Car Crash
+      </span>
+      <span class="scene-pill" data-scene="cat-jenga">
+        <img src="assets/cat-jenga_thumb.jpg" alt="cat jenga">
+        Cat Jenga
+      </span>
+      <span class="scene-pill" data-scene="cat-plays-yarn">
+        <img src="assets/cat-plays-yarn_thumb.jpg" alt="cat plays yarn">
+        Cat &amp; Yarn
+      </span>
+      <span class="scene-pill" data-scene="jump-pool_001">
+        <img src="assets/jump-pool_001_thumb.jpg" alt="jump pool">
+        Jump Pool
+      </span>
+      <span class="scene-pill" data-scene="spinner">
+        <img src="assets/spinner_thumb.jpg" alt="spinner">
+        Spinner
+      </span>
+      <span class="scene-pill" data-scene="weight_on_pillow">
+        <img src="assets/weight_on_pillow_thumb.jpg" alt="weight on pillow">
+        Weight &amp; Pillow
+      </span>
+    </div>
+
+    <!-- Comparison slider -->
+    <div class="comparison-wrapper">
+      <div class="comparison-container" id="comparison-container">
+        <!-- Right video: VOID output (base layer) -->
+        <video id="video-right" autoplay muted loop playsinline>
+          <source src="assets/blender_model.mp4" type="video/mp4">
+        </video>
+        <!-- Left video: input + mask overlay (clipped) -->
+        <div id="overlay-wrapper">
+          <video id="video-left" autoplay muted loop playsinline>
+            <source src="assets/blender_overlay.mp4" type="video/mp4">
+          </video>
+        </div>
+        <!-- Draggable handle -->
+        <div id="comparison-handle">
+          <div class="handle-line"></div>
+          <div class="handle-circle">⟺</div>
+        </div>
+      </div>
+      <div class="comparison-labels">
+        <span>&#9664; Input + Mask</span>
+        <span id="label-right">VOID (Ours) &#9654;</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════ BIBTEX ══ -->
+<section class="section" id="BibTeX" style="background: var(--light-bg); padding-top: 2.5rem; padding-bottom: 2.5rem;">
+  <div class="container is-max-desktop content">
+    <h2 class="section-title">BibTeX</h2>
+    <pre style="max-width: 720px; margin: 0 auto; border-radius: 8px;"><code>@article{motamed2025void,
+  title     = {VOID: Video Object and Interaction Deletion},
+  author    = {Motamed, Saman and Harvey, William and Klein, Benjamin and
+               Van Gool, Luc and Yuan, Zhuoning and Cheng, Ta-Ying},
+  year      = {2025}
+}</code></pre>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════ FOOTER ══ -->
+<footer class="footer">
+  <div class="container has-text-centered">
+    <p>
+      Website template inspired by
+      <a href="https://nerfies.github.io/">Nerfies</a> and
+      <a href="https://gen-omnimatte.github.io/">Generative Omnimatte</a>.
+    </p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════ SCRIPTS ══ -->
+<script>
+  const container   = document.getElementById('comparison-container');
+  const overlayWrap = document.getElementById('overlay-wrapper');
+  const videoLeft   = document.getElementById('video-left');
+  const videoRight  = document.getElementById('video-right');
+  const handle      = document.getElementById('comparison-handle');
+  const rightLabel  = document.getElementById('label-right');
+
+  let currentScene = 'blender';
+  let currentModel = 'model';
+
+  const modelLabels = {
+    model:                   'VOID (Ours)',
+    propainter:              'ProPainter',
+    diffueraser:             'DiffuEraser',
+    runway:                  'Runway',
+    minimax:                 'MiniMax-Remover',
+    rose:                    'ROSE',
+    gemonminatte_pretrained: 'Gen-Omnimatte',
+  };
+
+  // ── Size left video to match container width (for correct clipping) ──────
+  function syncVideoWidth() {
+    videoLeft.style.width = container.offsetWidth + 'px';
+  }
+  syncVideoWidth();
+  window.addEventListener('resize', syncVideoWidth);
+
+  // ── Keep both videos in sync ──────────────────────────────────────────────
+  videoLeft.addEventListener('timeupdate', () => {
+    if (Math.abs(videoLeft.currentTime - videoRight.currentTime) > 0.15) {
+      videoRight.currentTime = videoLeft.currentTime;
+    }
+  });
+
+  // ── Slider position ───────────────────────────────────────────────────────
+  function setSlider(clientX) {
+    const rect = container.getBoundingClientRect();
+    let pct = (clientX - rect.left) / rect.width;
+    pct = Math.max(0.02, Math.min(0.98, pct));
+    overlayWrap.style.width = (pct * 100) + '%';
+    handle.style.left = (pct * 100) + '%';
+  }
+
+  let dragging = false;
+
+  // Mouse
+  container.addEventListener('mousedown', e => { dragging = true; setSlider(e.clientX); e.preventDefault(); });
+  document.addEventListener('mousemove',  e => { if (dragging) setSlider(e.clientX); });
+  document.addEventListener('mouseup',    () => { dragging = false; });
+
+  // Touch
+  container.addEventListener('touchstart', e => { dragging = true; setSlider(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('touchmove',   e => { if (dragging) setSlider(e.touches[0].clientX); }, { passive: true });
+  document.addEventListener('touchend',    () => { dragging = false; });
+
+  // ── Load videos ───────────────────────────────────────────────────────────
+  function loadVideos() {
+    videoLeft.querySelector('source').src  = `assets/${currentScene}_overlay.mp4`;
+    videoRight.querySelector('source').src = `assets/${currentScene}_${currentModel}.mp4`;
+    videoLeft.load();
+    videoRight.load();
+    overlayWrap.style.width = '50%';
+    handle.style.left = '50%';
+    videoLeft.play();
+    videoRight.play();
+    rightLabel.textContent = modelLabels[currentModel] + ' ▶';
+  }
+
+  // ── Scene pills ───────────────────────────────────────────────────────────
+  document.querySelectorAll('.scene-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.scene-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentScene = pill.dataset.scene;
+      loadVideos();
+    });
+  });
+
+  // ── Model pills ───────────────────────────────────────────────────────────
+  document.querySelectorAll('.model-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.model-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      currentModel = pill.dataset.model;
+      loadVideos();
+    });
+  });
+</script>
 
 </body>
 </html>
