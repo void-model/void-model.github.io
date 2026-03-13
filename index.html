@@ -159,21 +159,13 @@
       object-fit: cover;
     }
 
-    /* Wrapper that clips the left video */
-    #overlay-wrapper {
-      position: absolute;
-      top: 0; left: 0;
-      width: 50%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    /* Left video — always sized to the full container width, clipped by wrapper */
+    /* Left video — full size, clipped via clip-path */
     #video-left {
       position: absolute;
       top: 0; left: 0;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
+      clip-path: inset(0 50% 0 0);
     }
 
     /* Draggable handle */
@@ -310,7 +302,7 @@
 
           <h1 class="publication-title" style="margin-bottom: 0.4rem;">
             <img src="assets/void-logo-web.png" alt="VOID logo"
-                 style="height:2.6rem; vertical-align:middle; margin-right:0.4rem; position:relative; top:-0.6rem;">  
+                 style="height:2.6rem; vertical-align:middle; margin-right:0.4rem; position:relative; top:-0.6rem;">
             <span class="void-logo">VOID</span><br>
             <span class="publication-subtitle">Video Object and Interaction Deletion</span>
           </h1>
@@ -350,6 +342,18 @@
               <a href="#" class="external-link button is-normal is-rounded is-dark">
                 <span class="icon"><i class="fab fa-github"></i></span>
                 <span>Code</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#" class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-database"></i></span>
+                <span>Dataset</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="#podcast" class="button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-podcast"></i></span>
+                <span>Podcast</span>
               </a>
             </span>
           </div>
@@ -465,12 +469,10 @@
         <video id="video-right" autoplay muted loop playsinline>
           <source src="assets/blender_model.mp4" type="video/mp4">
         </video>
-        <!-- Left video: input + mask overlay (clipped) -->
-        <div id="overlay-wrapper">
-          <video id="video-left" autoplay muted loop playsinline>
-            <source src="assets/blender_overlay.mp4" type="video/mp4">
-          </video>
-        </div>
+        <!-- Left video: input + mask overlay (clipped via clip-path) -->
+        <video id="video-left" autoplay muted loop playsinline>
+          <source src="assets/blender_overlay.mp4" type="video/mp4">
+        </video>
         <!-- Draggable handle -->
         <div id="comparison-handle">
           <div class="handle-line"></div>
@@ -535,11 +537,9 @@
         <video id="p2-video-right" autoplay muted loop playsinline style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">
           <source src="assets/ball-p2.mp4" type="video/mp4">
         </video>
-        <div id="p2-overlay-wrapper" style="position:absolute;top:0;left:0;width:50%;height:100%;overflow:hidden;">
-          <video id="p2-video-left" autoplay muted loop playsinline style="position:absolute;top:0;left:0;height:100%;object-fit:cover;">
-            <source src="assets/ball-p1.mp4" type="video/mp4">
-          </video>
-        </div>
+        <video id="p2-video-left" autoplay muted loop playsinline style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;clip-path:inset(0 50% 0 0);">
+          <source src="assets/ball-p1.mp4" type="video/mp4">
+        </video>
         <div id="p2-handle" class="comparison-handle" style="position:absolute;top:0;left:50%;transform:translateX(-50%);height:100%;width:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
           <div class="handle-line"></div>
           <div class="handle-circle">⟺</div>
@@ -620,6 +620,19 @@
   </div>
 </section>
 
+<!-- ══════════════════════════════════════════════════════════ PODCAST ══ -->
+<section class="section" id="podcast" style="padding-top: 3rem; padding-bottom: 3rem;">
+  <div class="container is-max-desktop">
+    <h2 class="section-title">Podcast Overview</h2>
+    <p class="section-subtitle">An AI-generated audio overview of the paper.</p>
+    <div style="max-width: 720px; margin: 0 auto;">
+      <audio controls preload="metadata" style="width:100%;">
+        <source src="assets/podcast.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════════════════════════════════════════════════════ BIBTEX ══ -->
 <section class="section" id="BibTeX" style="background: var(--light-bg); padding-top: 2.5rem; padding-bottom: 2.5rem;">
   <div class="container is-max-desktop content">
@@ -647,7 +660,6 @@
 <!-- ══════════════════════════════════════════════════════════ SCRIPTS ══ -->
 <script>
   const container   = document.getElementById('comparison-container');
-  const overlayWrap = document.getElementById('overlay-wrapper');
   const videoLeft   = document.getElementById('video-left');
   const videoRight  = document.getElementById('video-right');
   const handle      = document.getElementById('comparison-handle');
@@ -666,13 +678,6 @@
     gemonminatte_pretrained: 'Gen-Omnimatte',
   };
 
-  // ── Size left video to match container width (for correct clipping) ──────
-  function syncVideoWidth() {
-    videoLeft.style.width = container.offsetWidth + 'px';
-  }
-  syncVideoWidth();
-  window.addEventListener('resize', syncVideoWidth);
-
   // ── Keep both videos in sync ──────────────────────────────────────────────
   videoLeft.addEventListener('timeupdate', () => {
     if (Math.abs(videoLeft.currentTime - videoRight.currentTime) > 0.15) {
@@ -680,23 +685,18 @@
     }
   });
 
-  // ── Slider position ───────────────────────────────────────────────────────
+  // ── Slider position (clip-path reveal) ───────────────────────────────────
   function setSlider(clientX) {
     const rect = container.getBoundingClientRect();
-    let pct = (clientX - rect.left) / rect.width;
-    pct = Math.max(0.02, Math.min(0.98, pct));
-    overlayWrap.style.width = (pct * 100) + '%';
+    let pct = Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
+    videoLeft.style.clipPath = `inset(0 ${(1 - pct) * 100}% 0 0)`;
     handle.style.left = (pct * 100) + '%';
   }
 
   let dragging = false;
-
-  // Mouse
   container.addEventListener('mousedown', e => { dragging = true; setSlider(e.clientX); e.preventDefault(); });
   document.addEventListener('mousemove',  e => { if (dragging) setSlider(e.clientX); });
   document.addEventListener('mouseup',    () => { dragging = false; });
-
-  // Touch
   container.addEventListener('touchstart', e => { dragging = true; setSlider(e.touches[0].clientX); }, { passive: true });
   document.addEventListener('touchmove',   e => { if (dragging) setSlider(e.touches[0].clientX); }, { passive: true });
   document.addEventListener('touchend',    () => { dragging = false; });
@@ -707,7 +707,7 @@
     videoRight.querySelector('source').src = `assets/${currentScene}_${currentModel}.mp4`;
     videoLeft.load();
     videoRight.load();
-    overlayWrap.style.width = '50%';
+    videoLeft.style.clipPath = 'inset(0 50% 0 0)';
     handle.style.left = '50%';
     videoLeft.play();
     videoRight.play();
@@ -725,17 +725,10 @@
   });
 
   // ── Pass 2 slider ─────────────────────────────────────────────────────────
-  const p2Container    = document.getElementById('p2-container');
-  const p2OverlayWrap  = document.getElementById('p2-overlay-wrapper');
-  const p2VideoLeft    = document.getElementById('p2-video-left');
-  const p2VideoRight   = document.getElementById('p2-video-right');
-  const p2Handle       = document.getElementById('p2-handle');
-
-  function syncP2VideoWidth() {
-    p2VideoLeft.style.width = p2Container.offsetWidth + 'px';
-  }
-  syncP2VideoWidth();
-  window.addEventListener('resize', syncP2VideoWidth);
+  const p2Container  = document.getElementById('p2-container');
+  const p2VideoLeft  = document.getElementById('p2-video-left');
+  const p2VideoRight = document.getElementById('p2-video-right');
+  const p2Handle     = document.getElementById('p2-handle');
 
   p2VideoLeft.addEventListener('timeupdate', () => {
     if (Math.abs(p2VideoLeft.currentTime - p2VideoRight.currentTime) > 0.15) {
@@ -746,7 +739,7 @@
   function setP2Slider(clientX) {
     const rect = p2Container.getBoundingClientRect();
     let pct = Math.max(0.02, Math.min(0.98, (clientX - rect.left) / rect.width));
-    p2OverlayWrap.style.width = (pct * 100) + '%';
+    p2VideoLeft.style.clipPath = `inset(0 ${(1 - pct) * 100}% 0 0)`;
     p2Handle.style.left = (pct * 100) + '%';
   }
 
@@ -762,7 +755,7 @@
     p2VideoLeft.querySelector('source').src  = `assets/${name}-p1.mp4`;
     p2VideoRight.querySelector('source').src = `assets/${name}-p2.mp4`;
     p2VideoLeft.load();  p2VideoRight.load();
-    p2OverlayWrap.style.width = '50%';
+    p2VideoLeft.style.clipPath = 'inset(0 50% 0 0)';
     p2Handle.style.left = '50%';
     p2VideoLeft.play();  p2VideoRight.play();
     ['ball','uke'].forEach(d => {
