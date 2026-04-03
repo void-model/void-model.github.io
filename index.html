@@ -643,15 +643,33 @@
 <!-- ═══════════════════════════════════════════════════════════ BIBTEX ══ -->
 <section class="section" id="BibTeX" style="background: var(--light-bg); padding-top: 2.5rem; padding-bottom: 2.5rem;">
   <div class="container is-max-desktop content">
-    <h2 class="section-title">BibTeX</h2>
-    <pre style="max-width: 720px; margin: 0 auto; border-radius: 8px;"><code>@article{motamed2026void,
-  title     = {VOID: Video Object and Interaction Deletion},
-  author    = {Motamed, Saman and Harvey, William and Klein, Benjamin and
-               Van Gool, Luc and Yuan, Zhuoning and Cheng, Ta-Ying},
-  year      = {2026}
+    
+    <h2 class="section-title">📄 Citation</h2>
+    <p style="text-align: center;">If you find our work useful, please consider citing:</p>
+
+    <pre id="bibtex-block" style="max-width: 720px; margin: 1rem auto; border-radius: 8px;"><code>@misc{motamed2026void,
+  title={VOID: Video Object and Interaction Deletion}, 
+  author={Saman Motamed and William Harvey and Benjamin Klein and Luc Van Gool and Zhuoning Yuan and Ta-Ying Cheng},
+  year={2026},
+  eprint={2604.02296},
+  archivePrefix={arXiv},
+  primaryClass={cs.CV},
+  url={https://arxiv.org/abs/2604.02296}
 }</code></pre>
+
+    <div style="text-align: center;">
+      <button class="button is-dark is-rounded" onclick="copyBibtex()">Copy BibTeX</button>
+    </div>
+
   </div>
 </section>
+
+<script>
+function copyBibtex() {
+  const text = document.getElementById("bibtex-block").innerText;
+  navigator.clipboard.writeText(text);
+}
+</script>
 
 <!-- ════════════════════════════════════════════════════════════ FOOTER ══ -->
 <footer class="footer">
